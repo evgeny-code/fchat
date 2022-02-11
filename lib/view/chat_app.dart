@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'chat_widget.dart';
 import 'contacts_widget.dart';
+import 'dev_widget.dart';
 
 class ChatApp extends StatefulWidget {
   const ChatApp({Key? key}) : super(key: key);
@@ -50,7 +51,7 @@ class _ChatAppState extends State<ChatApp> with SingleTickerProviderStateMixin {
               ContactsWidget(),
               QrCodeWidget(),
               Icon(Icons.directions_bike),
-              Icon(Icons.directions_bike),
+              DevWidget(),
             ],
           ),
         ),

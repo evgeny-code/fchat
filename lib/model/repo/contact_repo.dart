@@ -1,6 +1,9 @@
 library model;
 
+import 'dart:developer';
+
 import 'package:fchat/dto/contact.dart';
+import 'package:fchat/model/db/db_provider.dart';
 
 
 class ContactRepo {
@@ -12,8 +15,42 @@ class ContactRepo {
 
   ContactRepo._internal();
 
+  Future<Contact> getContact(String keyHash) async {
+    var db = (await DBProvider.db.database)!;
+    List<Map> list = await db.rawQuery(
+        'SELECT * FROM contacts WHERE keyHash = $keyHash ');
 
-  List<Contact> getContacts() {
+    for (Map row in list) {
+      return Contact.ofDB(
+          keyHash: row['keyHash'],
+          publicKeyB64: row['publicKeyB64'],
+          name: row['name']);
+    }
+
+    throw Exception("Contact not exist");
+  }
+
+  Future<List<Contact>> getContacts() async {
+    var db = (await DBProvider.db.database)!;
+    List<Map> list = await db.rawQuery(
+        'SELECT * FROM contacts '
+            'order by name;');
+
+    List<Contact> result = [];
+    for (Map row in list) {
+      result.add(Contact.ofDB(
+          keyHash: row['keyHash'],
+          publicKeyB64: row['publicKeyB64'],
+          name: row['name']));
+    }
+
+
+    log("getContacts result: " + result.toString());
+
+    return result;
+  }
+
+  List<Contact> getContactsTest() {
     return [
       Contact(publicKeyB64: "wEN8aUU5ZvXcDqJoI0ieMdXv4a3B4dxOy8zT1zEYV9sQ1xZ53zSm4yHPeLYEcW1O", name: "UJIN"),
       Contact(publicKeyB64: "nmcSr2yBitIPxgiTGmNA9JQdofXHhwy1p15NoymKDJ4XWLRJRL2Fv257umMK49iY", name: "WEROX"),

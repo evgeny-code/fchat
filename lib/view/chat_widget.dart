@@ -17,7 +17,7 @@ class _ChatWidgetState extends State<ChatWidget> {
   final TextEditingController _msgController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  final List<Contact> _contacts = ContactRepo().getContacts();
+  final Future<Contact> _contact = ContactRepo().getContact(MessageRepo.human);
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class _ChatWidgetState extends State<ChatWidget> {
           List<Message> _messages = snapshot.data!;
           var result = Column(
             children: <Widget>[
-              ContactWidget(contact: _contacts[0]),
+              ContactWidget(contact: _contact),
               Expanded(
                 child: ListView.builder(
                   shrinkWrap: true,

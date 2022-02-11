@@ -9,51 +9,76 @@ class ContactsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var contacts = ContactRepo().getContacts();
-
-    return ListView.builder(
-      itemCount: contacts.length,
-      shrinkWrap: true,
-      padding: EdgeInsets.all(15.0),
-      itemBuilder: (context, index) {
-        return ContactWidget(contact: contacts[index]);
+    return FutureBuilder<List<Contact>>(
+      future: ContactRepo().getContacts(),
+      builder: (BuildContext context, AsyncSnapshot<List<Contact>> snapshot) {
+        if (snapshot.hasData) {
+          List<Contact>? contacts = snapshot.data;
+          return ListView.builder(
+            itemCount: contacts!.length,
+            shrinkWrap: true,
+            padding: const EdgeInsets.all(15.0),
+            itemBuilder: (context, index) {
+              return ContactWidget(contact: Future(() => contacts[index]));
+            },
+          );
+        } else {
+          return const Text("WAIT...");
+        }
       },
     );
   }
 }
 
 class ContactWidget extends StatelessWidget {
-  Contact contact;
+  Future<Contact> contact;
 
   ContactWidget({Key? key, required this.contact}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      style: TextButton.styleFrom(
-        padding: const EdgeInsets.all(16.0),
-        primary: Colors.white,
-        textStyle: const TextStyle(fontSize: 20),
-      ),
-      onPressed: () {
-        ControllerRegistry().tabController.animateTo(0);
-      },
-      child: Card(
-          elevation: 20,
-          color: Colors.lightBlue,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(50),
-          ),
-          child: Container(
-            width: double.infinity,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(contact.name, style: TextStyle(fontSize: 40)),
-                Container(padding: EdgeInsets.all(10), child: Text(contact.keyHash, style: TextStyle(fontSize: 10), textAlign: TextAlign.center,)),
-              ],
+    var fb = FutureBuilder<Contact>(
+      future: contact,
+      builder: (BuildContext context, AsyncSnapshot<Contact> snapshot) {
+        if (snapshot.hasData) {
+          return TextButton(
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.all(16.0),
+              primary: Colors.white,
+              textStyle: const TextStyle(fontSize: 20),
             ),
-          )),
+            onPressed: () {
+              ControllerRegistry().tabController.animateTo(0);
+            },
+            child: Card(
+                elevation: 20,
+                color: Colors.lightBlue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: Container(
+                  width: double.infinity,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(snapshot.data!.name, style: const TextStyle(fontSize: 40)),
+                      Container(
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                            snapshot.data!.keyHash,
+                            style: const TextStyle(fontSize: 10),
+                            textAlign: TextAlign.center,
+                          )),
+                    ],
+                  ),
+                )),
+          );
+        } else {
+          return const Text("WAIT...");
+        }
+      },
     );
+
+    return fb;
   }
 }
